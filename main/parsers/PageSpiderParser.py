@@ -1,5 +1,5 @@
 '''
-Created on 22 juin 2013
+Created on 30 november 2014
 
 @author: Vittorio
 '''
@@ -16,11 +16,9 @@ class PageSpiderParser(SpiderParser.SpiderParser):
         - links contained in the page
     """
     
-    global weight
-    
     hrefAttributes = ['href']
     relevantTags = ['a','p']
-    relevantWordsRE = re.compile('\w{3}\w+')
+    relevantWordsRE = re.compile('\w+')
     
     def __init__(self, weightedWords, strict=False):
         SpiderParser.SpiderParser.__init__(self, weightedWords, strict=strict)

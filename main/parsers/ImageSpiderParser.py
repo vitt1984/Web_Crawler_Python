@@ -1,5 +1,5 @@
 '''
-Created on 22 juin 2013
+Created on 30 november 2014
 
 @author: Vittorio
 '''
@@ -37,6 +37,7 @@ class ImageSpiderParser(SpiderParser.SpiderParser):
                         print ("Spider", os.getpid(), "found", word, "adding",self.weightedWords[word.lower()],"to this image")
                         hRefWeight += self.weightedWords[word]
                 if hRefWeight > hRefMaxWeight:
+                    hRefMaxWeight = hRefWeight
                     heaviestHref = hRef
         
         return heaviestHref

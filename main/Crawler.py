@@ -1,21 +1,21 @@
 '''
-Created on 22 juin 2013
+Created on 30 november 2014
 
 @author: Vittorio
 '''
 
-import multiprocessing
-from multiprocessing import Process
-from collections import defaultdict
-
-from main.spiders import PageSpider
-from main.spiders import ImageSpider
 import time
-from urllib.parse import urlparse
 import pprint
 import operator
 import math
 import argparse
+
+from multiprocessing import Process, Manager
+from collections import defaultdict
+from urllib.parse import urlparse
+
+from main.spiders import PageSpider
+from main.spiders import ImageSpider
 
 if __name__ == "__main__":
     
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', dest='startPage', action='store', required=True,
                        help='the first page that will be checked')
     parser.add_argument('-w', dest='words', nargs='+', required=True,
-                       help='words to look for')
+                       help='words to look for, in order of importance')
     parser.add_argument('--maxDepth', dest='maxDepth', type=int, default=1, required=False,
                        help='depth of link search. Default value is 1')
     parser.add_argument('--nbSpiders', dest='nbSpiders', type=int, default=3, required=False,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     pp = pprint.PrettyPrinter(indent=4)
         
-    m = multiprocessing.Manager()
+    m = Manager()
     pagesQueue = m.Queue()
     visitedPages = m.dict()
     pagesWithImage = m.dict()

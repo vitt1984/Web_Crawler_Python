@@ -1,5 +1,5 @@
 '''
-Created on 22 juin 2013
+Created on 30 november 2014
 
 @author: Vittorio
 '''
@@ -16,8 +16,7 @@ class Spider:
     Sub classes must implement the handleQueueItem method
     """
     
-    global parser
-    global weightedWords
+    http = "http://"
     
     def __init__(self, weightedWords):
         self.weightedWords = weightedWords

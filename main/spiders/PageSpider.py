@@ -1,14 +1,12 @@
 '''
-Created on 22 juin 2013
+Created on 30 november 2014
 
 @author: Vittorio
 '''
 
-import urllib.request
-
-import re
-
 import os
+
+import urllib.request
 from urllib.parse import urlparse
 
 from main.parsers import PageSpiderParser
@@ -21,9 +19,6 @@ class PageSpider (Spider.Spider):
         - new links (if the distance from the initial page is not too high)
     The visited page is added to the shared dict with its weight for later stats
     """
-    
-    global maxDistance
-    global hostnameFilter
     
     def __init__(self, weightedWords, maxDistance, hostnameFilter=None):
         super(PageSpider, self).__init__(weightedWords)
@@ -48,12 +43,12 @@ class PageSpider (Spider.Spider):
             data = response.read()
             text = data.decode()
             
-            hostname = "http://" + urlparse(page).hostname
+            hostname = self.http + urlparse(page).hostname
             
             weight, hRefs = self.parser.feed(text, hostname, distancePage < self.maxDistance)
         
             for link in list(hRefs):
-                linkHostname = "http://" + urlparse(link).hostname
+                linkHostname = self.http + urlparse(link).hostname
                 
                 if page != link and ((self.hostnameFilter is None) or (self.hostnameFilter == linkHostname)):
                     pagesQueue.put([link,distancePage+1])

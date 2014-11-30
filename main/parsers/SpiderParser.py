@@ -1,40 +1,24 @@
 '''
-Created on 22 juin 2013
+Created on 30 november 2014
 
 @author: Vittorio
 '''
 
-import urllib.request
-
 import re
 
-import sys
-import codecs
 from html.parser import HTMLParser
-from html.entities import name2codepoint
-from test.test_descrtut import defaultdict
-from collections import Counter
-import pprint
-import os
-import time
-import datetime
-from urllib.parse import urlparse
-
-import queue
-from multiprocessing import Queue
+from urllib.parse import urljoin
 
 class SpiderParser(HTMLParser):
     """SpiderParser class
+    Overrides HTMLParser
     Basic tag handling and attributes harvesting.
     The subclass has to specify the necessary attributes.
     """
     
-    global currentTags
-    global hRefs
-    global hostname
-    global weightedWords
-    global relevantAttributes
-    
+    unwantedFiles= set([".css",".rss",".js"]) # list might be longer...
+    fileExtensionRe=re.compile("\.[a-zA-Z0-9]+$")
+        
     def __init__(self, weightedWords, strict=False):
         HTMLParser.__init__(self, strict=strict)
         self.weightedWords = weightedWords
@@ -42,12 +26,11 @@ class SpiderParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
         self.currentTags.append(tag)
         for attr in attrs:
-            if attr[0] in self.relevantAttributes and not (attr[1].startswith("#") or attr[1].startswith("javascript")) and not (attr[1].endswith(".css") or attr[1].endswith(".rss") or attr[1].endswith(".js")):
+            fileExtension = self.fileExtensionRe.search(attr[1])
+            if attr[0] in self.relevantAttributes and (fileExtension is None or fileExtension not in self.unwantedFiles):
                 link = attr[1]
-                if link.startswith("//"):
-                    link = "http:" + link                    
-                elif link.startswith("/"):
-                    link = self.hostname + link
+                if link.startswith("/"):
+                    link = urljoin(self.hostname, link)
                 if link.startswith("http"):
                     self.links.add(link)
             
