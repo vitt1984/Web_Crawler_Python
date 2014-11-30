@@ -8,7 +8,8 @@ import multiprocessing
 from multiprocessing import Process
 from collections import defaultdict
 
-from main import Spider
+from main.spiders import PageSpider
+from main.spiders import ImageSpider
 import time
 from urllib.parse import urlparse
 import pprint
@@ -19,38 +20,40 @@ if __name__ == "__main__":
     
     pp = pprint.PrettyPrinter(indent=4)
         
-    #pool = multiprocessing.Pool(processes=4)
     m = multiprocessing.Manager()
     pagesQueue = m.Queue()
-    
-    # TODO not a set as it should be
     visitedPages = m.dict()
-    
-    #workers = pool.apply_async(aSpider.run(), pagesQueue)
-    
+    pagesWithImage = m.dict()
+    processes = []
+
     startPage="http://www.ilfattoquotidiano.it/"
+    words = ['renzi']
+    
+    print ("Assigning weight to words...")
     
     pagesQueue.put([startPage,0])
     
-    words = ['berlusconi', 'ruby', 'processo']
     weightedWords = defaultdict(int)
     for word in words:
         weightedWords[word.lower()] = math.pow(len(words)-words.index(word),2)
     
     pp.pprint(sorted(weightedWords.items(), key=operator.itemgetter(1)))
     
-    processes = []
-
-    aSpider = Spider.Spider(weightedWords, 1, "http://" + urlparse(startPage).hostname)
+    print ("Creating spiders...")
     
-    p1 = Process(target=aSpider.run, args=[pagesQueue,visitedPages])
+    aPageSpider = PageSpider.PageSpider(weightedWords, 1, "http://" + urlparse(startPage).hostname)
+    aImageSpider = ImageSpider.ImageSpider(weightedWords)
+    
+    print ("Sending spiders...")
+    
+    p1 = Process(target=aPageSpider.run, args=[pagesQueue,visitedPages])
     processes.append(p1)
     p1.start()
         
     time.sleep(10)
     
     for i in range(3):
-        p = Process(target=aSpider.run, args=[pagesQueue,visitedPages])
+        p = Process(target=aPageSpider.run, args=[pagesQueue,visitedPages])
         processes.append(p)
         p.start()
         
@@ -67,6 +70,16 @@ if __name__ == "__main__":
     
     print ("Ordering dict...")
     
-    pp.pprint(sorted(visitedPages.items(), key=operator.itemgetter(1)))
+    tenMostMatchingPages = sorted(visitedPages.items(), key=operator.itemgetter(1))[-10:]
+    
+    pp.pprint(tenMostMatchingPages)
+    
+    print ("For the ten closest matching pages, send a spider to check the most relevant images...")
+    
+    for pageWithWeight in tenMostMatchingPages:
+        pagesQueue.put(pageWithWeight[0])
 
+    aImageSpider.run(pagesQueue,pagesWithImage)
+
+    pp.pprint(dict(pagesWithImage))
 
