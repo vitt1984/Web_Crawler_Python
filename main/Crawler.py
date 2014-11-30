@@ -28,6 +28,8 @@ if __name__ == "__main__":
                        help='depth of link search. Default value is 1')
     parser.add_argument('--nbSpiders', dest='nbSpiders', type=int, default=3, required=False,
                        help='number of spiders that will be generated. Default value is 3')
+    parser.add_argument('--noLimit', dest='noLimit', action='store_const', const=True, required=False, default=False,
+                       help='does not limit search to this website')
     
     args = parser.parse_args()
 
@@ -43,6 +45,7 @@ if __name__ == "__main__":
     print ("Looking for words: ", args.words)
     print ("Max depth: ", args.maxDepth)
     print ("Number of spiders: ", args.nbSpiders)
+    print ("Does not limit ?: ", args.noLimit)
     
     print ("Assigning weight to words...")
     
@@ -56,7 +59,11 @@ if __name__ == "__main__":
     
     print ("Creating spiders...")
     
-    aPageSpider = PageSpider.PageSpider(weightedWords, args.maxDepth, "http://" + urlparse(args.startPage).hostname)
+    if (args.noLimit):
+        aPageSpider = PageSpider.PageSpider(weightedWords, args.maxDepth)
+    else:
+        aPageSpider = PageSpider.PageSpider(weightedWords, args.maxDepth, "http://" + urlparse(args.startPage).hostname)
+    
     aImageSpider = ImageSpider.ImageSpider(weightedWords)
     
     print ("Sending spiders...")
